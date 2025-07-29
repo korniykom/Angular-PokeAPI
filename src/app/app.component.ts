@@ -1,4 +1,4 @@
-import { Component, signal } from "@angular/core";
+import { Component, HostListener, signal } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 
 @Component({
@@ -8,5 +8,15 @@ import { RouterOutlet } from "@angular/router";
   styleUrl: "./app.component.scss",
 })
 export class AppComponent {
-  protected readonly title = signal("poke-api");
+  online = navigator.onLine;
+
+  @HostListener("window:online")
+  onOnline() {
+    this.online = true;
+  }
+
+  @HostListener("window:offline")
+  onOffline() {
+    this.online = false;
+  }
 }
