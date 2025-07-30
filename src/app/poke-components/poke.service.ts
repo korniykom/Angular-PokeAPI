@@ -37,6 +37,17 @@ export class PokeService {
     );
   }
 
+  getPickachu() {
+    return this.http.get(`${this.BASE_URL}/pokemon/25`).pipe(
+      retry(2),
+      map(this.mapToPokemon),
+      catchError((error) => {
+        console.log("Error loading Pikachu", error);
+        return of(null);
+      })
+    );
+  }
+
   getPokemonById(id: string) {
     return this.http.get(`${this.BASE_URL}/pokemon/${id}`).pipe(
       retry(2),

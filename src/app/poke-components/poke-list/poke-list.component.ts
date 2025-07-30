@@ -6,6 +6,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { PokeChips } from "../poke-chips/poke-chips.component";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatIconModule } from "@angular/material/icon";
+import { forkJoin, map } from "rxjs";
 
 @Component({
   selector: "app-poke-list",
@@ -32,12 +33,25 @@ export class PokeList implements OnInit {
   }
 
   loadPokemons() {
-    (this.isLoading = true),
-      (this.error = false),
-      this.pokemonService.getRandomPokemons(12).subscribe({
-        next: (pokemons) => {
-          (this.pokemons = pokemons), (this.isLoading = false);
-          console.log(pokemons);
+    this.isLoading = true;
+    this.error = false;
+
+    forkJoin({
+      pikachu: this.pokemonService.getPickachu(),
+      pokemons: this.pokemonService.getRandomPokemons(11),
+    })
+      .pipe(
+        map(({ pikachu, pokemons }) => {
+          if (!pikachu) return pokemons;
+          const exists = pokemons.some((p) => p.id === pikachu?.id);
+          return exists ? pokemons : [pikachu, ...pokemons];
+        })
+      )
+      .subscribe({
+        next: (combined: Pokemon[]) => {
+          this.pokemons = combined;
+          this.isLoading = false;
+          this.applySort();
         },
         error: (error) => {
           console.log("Error loading pokemons", error);
